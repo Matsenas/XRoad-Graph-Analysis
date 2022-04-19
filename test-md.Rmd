@@ -14,36 +14,41 @@ library(tidyverse)
 library(R.utils)
 ```
 
-## Getting data
+## Getting data from API
 
+Documentation found here: https://github.com/ria-ee/X-Road-opmonitor/blob/master/docs/opendata/user_guide/ug_opendata_api.md
 
 ```{r get-request}
-# Set up API URI
-baseURL <- "https://logs.x-tee.ee"
-instance <- "/EE"
-requestType <- "/api/daily_logs"
+# Set up URL
+baseURL <- "https://logs.x-tee.ee" # API domain
+instance <- "/EE/api" # instance, currently only for EE (Estonia) but in the future e.g. FI (Finland)
+requestType <- "/daily_logs" # request specification
+date <- "2020-03-06"  # date for daily log
 parameters <- paste0("?",
-                     "date=2020-03-06")
-call <- paste0(baseURL, instance, requestType, parameters)
+                     "date=", date)
+call <- paste0(baseURL, instance, requestType, parameters) # final URL
 
 # Getting details in API
 get_results <- GET(url = call)
 
 # Getting status of HTTP Call
-status_code(get_results) # 200 means good
+status_code(get_results) # 2xx means success, 3xx client side error, 4xx server side error
 
-res <- completeURI %>% GET(add_headers(.headers = c('Accept-Encoding' = 'gzip, deflate')))
-res1 <- res %>% content() %>% rawConnection()
-names(res$content)
+# Saving result tar.gz file
+tar_gz_filename <- paste0(date, ".tar.gz")
+get_results %>% content("raw") %>% writeBin(tar_gz_filename)
 
-data <- res  %>% content(as = "raw")
+# Unzip tar.gz
+file <- tar_gz_filename %>% untar()
+json_filename <- paste0(date, ".json")
+data <- read.delim(file = file, sep="\t")
+data <- fromJSON(file = json_filename)
+
+#saving
+# Save to file
+
 
 # Draft
-# adding parser
-assign("application/octet-stream", function(x, ...) {scan(gzcon(rawConnection(x)),"",,,"\n")},envir = httr:::parsers)
-
-scan(gzcon(res1),"",,,"\n") %>% parse_json()
-
 ```
 
 ## Including Plots

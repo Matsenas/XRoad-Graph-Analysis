@@ -24,15 +24,25 @@ instance <- "/EE"
 requestType <- "/api/daily_logs"
 parameters <- paste0("?",
                      "date=2020-03-06")
-completeURI <- paste0(baseURL, instance, requestType, parameters)
+call <- paste0(baseURL, instance, requestType, parameters)
 
-# Execute GET request
+# Getting details in API
+get_results <- GET(url = call)
+
+# Getting status of HTTP Call
+status_code(get_results) # 200 means good
+
 res <- completeURI %>% GET(add_headers(.headers = c('Accept-Encoding' = 'gzip, deflate')))
+res1 <- res %>% content() %>% rawConnection()
 names(res$content)
 
 data <- res  %>% content(as = "raw")
 
 # Draft
+# adding parser
+assign("application/octet-stream", function(x, ...) {scan(gzcon(rawConnection(x)),"",,,"\n")},envir = httr:::parsers)
+
+scan(gzcon(res1),"",,,"\n") %>% parse_json()
 
 ```
 

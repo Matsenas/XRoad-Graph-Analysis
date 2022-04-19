@@ -1,0 +1,46 @@
+---
+title: "X-Road Analysis"
+author: "Andrius Matšenas"
+date: "4/11/2022"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+#install.packages(c("httr", "jsonlite")) #install required packages
+library(httr)
+library(jsonlite)
+library(tidyverse)
+library(R.utils)
+```
+
+## Getting data
+
+
+```{r get-request}
+# Set up API URI
+baseURL <- "https://logs.x-tee.ee"
+instance <- "/EE"
+requestType <- "/api/daily_logs"
+parameters <- paste0("?",
+                     "date=2020-03-06")
+completeURI <- paste0(baseURL, instance, requestType, parameters)
+
+# Execute GET request
+res <- completeURI %>% GET(add_headers(.headers = c('Accept-Encoding' = 'gzip, deflate')))
+names(res$content)
+
+data <- res  %>% content(as = "raw")
+
+# Draft
+
+```
+
+## Including Plots
+
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
